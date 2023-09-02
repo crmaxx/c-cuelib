@@ -14,45 +14,6 @@
 #include "cue_utils.h"
 #include "cue_serializer.h"
 
-/* format millisecond into cue sheet timeline */
-static void format_timeline(char *output, int index)
-{
-	int minute = index / 60000;
-	int second = index % 60000 / 1000;
-	int frame = index % 60000 % 1000 * 75 / 1000;
-
-	char format[16] = {0};
-
-	if (minute < 10)
-	{
-		strcat(format, "0%d:");
-	}
-	else
-	{
-		strcat(format, "%d:");
-	}
-
-	if (second < 10)
-	{
-		strcat(format, "0%d:");
-	}
-	else
-	{
-		strcat(format, "%d:");
-	}
-
-	if (frame < 10)
-	{
-		strcat(format, "0%d");
-	}
-	else
-	{
-		strcat(format, "%d");
-	}
-
-	sprintf(output, format, minute, second, frame);
-}
-
 /**
  * Serialize cue sheet into a file.
  */
