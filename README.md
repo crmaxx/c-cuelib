@@ -22,8 +22,6 @@ Usage
 >		CueSheet *cue_sheet = parse_cue(filename);
 >		
 >		int track_num = get_int_metadata(cue_sheet, i, TRACK_NUM);
->		int track_start = get_int_metadata(cue_sheet, i, TRACK_START);
->		int track_end = get_int_metadata(cue_sheet, i, TRACK_END));
 >		...
 
 All the metadata filed can be found in `MetaDataField`.
