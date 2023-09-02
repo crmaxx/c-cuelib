@@ -171,27 +171,15 @@ void serialize_cue(CueSheet *cue_sheet, const char *out_path)
 			write_string("\"\n", fp);
 		}
 
-		char index0[16] = {0};
-		char index1[16] = {0};
-		if (i == 0)
+		if (track_data.index_count == 0)
 		{
 			write_string("    INDEX 01 00:00:00\n", fp);
 		}
-
-		if (track_data.index0 != 0)
+		else
 		{
-			write_string("    INDEX 00 ", fp);
-			format_timeline(index0, track_data.index0);
-			write_string(index0, fp);
-			write_string("\n", fp);
-		}
-
-		if (track_data.index1 != 0)
-		{
-			write_string("    INDEX 01 ", fp);
-			format_timeline(index1, track_data.index1);
-			write_string(index1, fp);
-			write_string("\n", fp);
+			for (int i = track_data.first_index; i <= track_data.index_count; i++) {
+				fprintf(fp, "    INDEX %02d %02d:%02d:%02d\n", i, track_data.index[i].m, track_data.index[i].s, track_data.index[i].f);
+			}
 		}
 	}
 
