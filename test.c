@@ -17,16 +17,14 @@ int main(int argc, char const *argv[])
 	for (i = 0; i < total_track; i ++)
 	{
 		printf("track%d\nalbum: %s\nperformer: %s\ngenre: %s\ntitle: %s\ndate :%s\n"
-			"filename: %s\nstart: %d\nend: %d\n", 
+			"filename: %s\n", 
 			get_int_metadata(cue_sheet, i, TRACK_NUM),
 			get_string_metadata(cue_sheet, i, ALBUM_TITLE), 
 			get_string_metadata(cue_sheet, i, TRACK_PERFORMER),
 			get_string_metadata(cue_sheet, i, GENRE),
 			get_string_metadata(cue_sheet, i, TRACK_TITLE),
 			get_string_metadata(cue_sheet, i, TRACK_DATE),
-			get_string_metadata(cue_sheet, i, FILENAME),
-			get_int_metadata(cue_sheet, i, TRACK_START),
-			get_int_metadata(cue_sheet, i, TRACK_END));
+			get_string_metadata(cue_sheet, i, FILENAME));
 	}
 
 	serialize_cue(cue_sheet, "./ser.cue");

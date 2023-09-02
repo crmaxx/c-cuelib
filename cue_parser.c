@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "cue_utils.h"
 #include "cue_parser.h"
@@ -238,8 +239,8 @@ static void parse_track(CueSheet *cue_sheet, const char *input)
 	track_data->track_num = track_num;
 }
 
-/* calculate mm:ss:ff to millisecond, ff = frames (75 per second) */
-static int calculate_duration(const char *input)
+/* parse mm:ss:ff formatted timecode */
+static Timecode parse_timecode(const char *input)
 {
 	int len = strlen(input);
 	char buf[len];
@@ -251,7 +252,11 @@ static int calculate_duration(const char *input)
 	substring(buf, input, len - 2, len);
 	int frame = atoi(trim(buf));
 
-	return (int) ((minute * 60 + second + (float) frame / 75) * 1000);
+	return (Timecode) {
+		.m = minute,
+		.s = second,
+		.f = frame
+	};
 }
 
 /**
@@ -273,17 +278,39 @@ static void parse_index(CueSheet *cue_sheet, const char *input)
 
 	TrackData *track_data = &cue_sheet->tracks_data[cue_sheet->total_track - 1];
 
-	if (starts_with(input, "00"))
-	{
-		substring(buf, input, strlen("00"), len);
-		input = trim(buf);
-		track_data->index0 = calculate_duration(input);
-	}
-	else if (starts_with(input, "01"))
-	{
-		substring(buf, input, strlen("01"), len);
-		input = trim(buf);
-		track_data->index1 = calculate_duration(input);
+	int index = atoi(input);
+
+	while (!isspace(*input++));
+	input = trim(input);
+
+	Timecode tc = parse_timecode(input);
+
+	if (track_data->index_count == 0) {
+		// the first INDEX command must either be 0 or 1.
+		// additionally, time must be 00:00:00
+
+		if (index != 0 && index != 1) {
+			printf("invalid index command\n");
+			return;
+		}
+
+		if (tc.m != 0 || tc.s != 0 || tc.f != 0) {
+			printf("invalid index command\n");
+			return;
+		}
+
+		track_data->index[index] = tc;
+		track_data->index_count = index + 1;
+		track_data->first_index = index;
+	} else {
+		// each successive INDEX command must be 1 more than the previous.
+		if (index != track_data->index_count) {
+			printf("invalid index command\n");
+			return;
+		}
+		
+		track_data->index[index] = tc;
+		track_data->index_count++;
 	}
 }
 
@@ -420,7 +447,7 @@ char *get_string_metadata(CueSheet *cue_sheet, int track_index, MetaDataField fi
 }
 
 /**
- * Convenience function for getting string metadata from the cue sheet.
+ * Convenience function for getting int metadata from the cue sheet.
  *
  * @param cue_sheet   poniter to CueSheet structure
  * @param track_index the index in tracks_data, if want to get global meta data, this
@@ -436,10 +463,6 @@ int get_int_metadata(CueSheet *cue_sheet, int track_index, MetaDataField filed)
 
 	TrackData *track_data = &cue_sheet->tracks_data[track_index];
 	TrackData *next_track_data;
-	int index0 = track_data->index0;
-	int index1 = track_data->index1;
-	int next_index0;
-	int next_index1;
 
 	switch (filed)
 	{
@@ -448,24 +471,6 @@ int get_int_metadata(CueSheet *cue_sheet, int track_index, MetaDataField filed)
 
 	case TRACK_NUM:
 		return track_data->track_num;
-
-	case TRACK_START:
-		return index1 ? index1 : index0;
-
-	case TRACK_END:
-		/* if the track is the last track, then there's no end time */
-		if (track_index < cue_sheet->total_track - 1)
-		{
-			next_track_data = &cue_sheet->tracks_data[track_index + 1];
-			next_index0 = next_track_data->index0;
-			next_index1 = next_track_data->index1;
-
-			return next_index0 ? next_index0 : next_index1;
-		}
-		else
-		{
-			return -1;
-		}
 
 	default:
 		return 0;

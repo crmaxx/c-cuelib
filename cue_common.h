@@ -11,6 +11,15 @@
 #define	__CUE_COMMON_H__
 
 /**
+ * Type definition for timecodes formatted as minute:second:frame
+ */
+typedef struct Timecode {
+	int m;
+	int s;
+	int f;
+} Timecode;
+
+/**
  * Type defination for track data.
  */
 typedef struct TrackData {
@@ -19,8 +28,9 @@ typedef struct TrackData {
 	char performer[1024];
 	char date[64];
 	char filename[1024];	/* absolute file path */
-	int index0;				/* index0 in millisecond */
-	int index1;				/* index1 in millisecond */
+	Timecode index[100];	/* timecodes */
+	int first_index;
+	int index_count;
 } TrackData;
 
 /**
