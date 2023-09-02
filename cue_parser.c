@@ -287,14 +287,8 @@ static void parse_index(CueSheet *cue_sheet, const char *input)
 
 	if (track_data->index_count == 0) {
 		// the first INDEX command must either be 0 or 1.
-		// additionally, time must be 00:00:00
 
 		if (index != 0 && index != 1) {
-			printf("invalid index command\n");
-			return;
-		}
-
-		if (tc.m != 0 || tc.s != 0 || tc.f != 0) {
 			printf("invalid index command\n");
 			return;
 		}
