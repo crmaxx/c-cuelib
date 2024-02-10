@@ -99,7 +99,7 @@ bool ends_with(const char *src, const char *suffix)
  */
 int index_of(const char *src, const char *sub)
 {
-	char *result = strstr(src, sub);
+	char *result = (char *)strstr(src, sub);
 
 	return result ? strlen(src) - strlen(result) : -1;
 }
@@ -143,7 +143,6 @@ int last_index_of(const char *src, const char *need)
  */
 char *trim(char *src)
 {
-	int i;
 	int len = strlen(src);
 	int start = 0, end = len - 1;
 

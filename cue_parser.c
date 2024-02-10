@@ -16,6 +16,10 @@
 #include "cue_utils.h"
 #include "cue_parser.h"
 
+#if defined(WIN32) && !defined(UNIX)
+#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
+#endif
+
 /* parse label REM COMMENT */
 static void parse_comment(CueSheet *cue_sheet, const char *input)
 {
@@ -281,7 +285,7 @@ static void parse_index(CueSheet *cue_sheet, const char *input)
 	int index = atoi(input);
 
 	while (!isspace(*input++));
-	input = trim(input);
+	input = trim((char *)input);
 
 	Timecode tc = parse_timecode(input);
 
@@ -456,7 +460,6 @@ int get_int_metadata(CueSheet *cue_sheet, int track_index, MetaDataField filed)
 	}
 
 	TrackData *track_data = &cue_sheet->tracks_data[track_index];
-	TrackData *next_track_data;
 
 	switch (filed)
 	{

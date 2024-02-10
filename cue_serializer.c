@@ -14,6 +14,7 @@
 #include "cue_utils.h"
 #include "cue_serializer.h"
 
+
 /**
  * Serialize cue sheet into a file.
  */
@@ -36,13 +37,20 @@ void serialize_cue(CueSheet *cue_sheet, const char *out_path)
 	}
 
 	/* clear file if existed */
+	#if defined(UNIX) && !defined(WIN32)
 	truncate(out_path, 0);
+	#endif
 
 	FILE *fp = fopen(out_path, "w");
 	if (!fp)
 	{
 		return;
 	}
+
+	/* clear file if existed */
+	#if defined(WIN32) && !defined(UNIX)
+	_chsize(fileno(fp), 0);
+	#endif
 
 	/* write global data, such as genre, album performer, file and so on */
 	if (strlen(cue_sheet->genre))
